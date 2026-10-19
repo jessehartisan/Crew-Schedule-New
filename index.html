@@ -153,13 +153,13 @@
     <!-- Left Sidebar: Active Crews & Jobs Sold/Unscheduled Backlog -->
     <aside class="w-80 bg-slate-900 border-r border-brand-border flex flex-col shrink-0">
       
-      <!-- Restored Pill Tabs -->
+      <!-- Restored Tabs -->
       <div class="p-2.5 border-b border-brand-border bg-slate-950/60 flex gap-2">
         <button onclick="setSidebarTab('crews')" id="tabBtnCrews" class="flex-1 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition shadow">Active Crews</button>
         <button onclick="setSidebarTab('unscheduled')" id="tabBtnUnscheduled" class="flex-1 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white transition border border-brand-border/60">Jobs Sold/Unscheduled</button>
       </div>
 
-      <!-- Panel 1: Active Crews -->
+      <!-- Panel 1: Active Crews (Clean Roster without subtitle) -->
       <div id="panelCrews" class="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
         <div class="flex items-center justify-between px-1 mb-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
           <span>Dispatch Roster</span>
@@ -168,7 +168,7 @@
         <div id="crewsListContainer" class="space-y-2"></div>
       </div>
 
-      <!-- Panel 2: Jobs Sold/Unscheduled with Full Edit Capabilities -->
+      <!-- Panel 2: Jobs Sold/Unscheduled Backlog -->
       <div id="panelUnscheduled" class="hidden flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
         <div class="flex items-center justify-between px-1 mb-1">
           <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Unscheduled Backlog</span>
@@ -187,11 +187,11 @@
     </main>
   </div>
 
-  <!-- MODAL 1: Edit Crew Roster & Specialty -->
+  <!-- MODAL 1: Simplified Edit Crew Roster (Trade/Specialty Removed) -->
   <div id="modalEditCrew" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-brand-border rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="text-base font-bold text-white">Edit Crew Roster & Specialty</h3>
+        <h3 class="text-base font-bold text-white">Edit Crew Details</h3>
         <button onclick="closeModal('modalEditCrew')" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
 
@@ -200,17 +200,6 @@
       <div>
         <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Crew Name</label>
         <input type="text" id="editCrewName" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Primary Trade / Specialty</label>
-        <input type="text" id="editCrewTrade" placeholder="e.g. Custom Decks & Railing" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
-        <div class="flex flex-wrap gap-1.5 mt-2">
-          <button type="button" onclick="setTradePreset('Custom Decks & Railing')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-brand-border">Custom Decks & Railing</button>
-          <button type="button" onclick="setTradePreset('Louvered Pergolas & Pavilions')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-brand-border">Pergolas & Pavilions</button>
-          <button type="button" onclick="setTradePreset('Framing & Carpentry')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-brand-border">Framing & Carpentry</button>
-          <button type="button" onclick="setTradePreset('Logistics & Material Drops')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-brand-border">Logistics</button>
-        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
@@ -263,7 +252,7 @@
         </div>
       </div>
 
-      <!-- Multi-Day Date Stretch Engine -->
+      <!-- Multi-Day Date Stretch Controls -->
       <div class="bg-slate-950/80 p-3 rounded-xl border border-brand-border space-y-2">
         <div class="flex items-center justify-between">
           <label class="block text-xs font-bold uppercase text-amber-400">Jobsite Duration & Continuous Stretch</label>
@@ -288,7 +277,7 @@
         </div>
       </div>
 
-      <!-- Fully Editable Scope Text Input with Presets -->
+      <!-- Editable Scope Input with Presets -->
       <div>
         <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Project Scope (Custom Input)</label>
         <input type="text" id="jobModalScopeInput" placeholder="e.g. 24x16 Trex Deck, Railing & Louvered Pergola" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
@@ -462,12 +451,13 @@
     let currentDate = new Date();
     let currentView = 'month';
 
+    // Crews list without trade subtitle
     let crews = JSON.parse(localStorage.getItem('crew_schedule_crews_v3')) || [
-      { id: 'crew-1', name: 'Joe', trade: 'Custom Decks & Railing', size: 4, color: '#a855f7' },
-      { id: 'crew-2', name: 'Joseph', trade: 'Custom Decks & Railing', size: 3, color: '#10b981' },
-      { id: 'crew-3', name: 'Sam', trade: 'Framing & Carpentry', size: 3, color: '#f43f5e' },
-      { id: 'crew-4', name: 'Willy', trade: 'Trim & Finish Carpentry', size: 5, color: '#3b82f6' },
-      { id: 'crew-5', name: '84 / Pickup', trade: 'Logistics & Material Drops', size: 1, color: '#d97706' }
+      { id: 'crew-1', name: 'Joe', size: 4, color: '#a855f7' },
+      { id: 'crew-2', name: 'Joseph', size: 3, color: '#10b981' },
+      { id: 'crew-3', name: 'Sam', size: 3, color: '#f43f5e' },
+      { id: 'crew-4', name: 'Willy', size: 5, color: '#3b82f6' },
+      { id: 'crew-5', name: '84 / Pickup', size: 1, color: '#d97706' }
     ];
 
     let unscheduledJobs = JSON.parse(localStorage.getItem('crew_schedule_unscheduled_v3')) || [
@@ -522,6 +512,7 @@
       `).join('');
     }
 
+    // Render Clean Roster without Trade Titles
     function renderCrewsSidebar() {
       const container = document.getElementById('crewsListContainer');
       const modalSelect = document.getElementById('jobModalCrewSelect');
@@ -534,7 +525,7 @@
         if (modalSelect) {
           const opt = document.createElement('option');
           opt.value = c.id;
-          opt.textContent = `${c.name} (${c.trade})`;
+          opt.textContent = c.name;
           modalSelect.appendChild(opt);
         }
 
@@ -551,12 +542,9 @@
 
         card.innerHTML = `
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2.5">
               <span class="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm" style="background-color: ${c.color}"></span>
-              <div>
-                <h4 class="text-sm font-bold text-white leading-tight">${c.name}</h4>
-                <p class="text-[10px] text-amber-300 font-medium">${c.trade}</p>
-              </div>
+              <h4 class="text-sm font-bold text-white leading-tight">${c.name}</h4>
             </div>
             <button onclick="openEditCrewModal('${c.id}')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-bold border border-brand-border">Edit</button>
           </div>
@@ -569,7 +557,7 @@
       });
     }
 
-    // Render Jobs Sold/Unscheduled Backlog with Complete Edit Features
+    // Render Jobs Sold/Unscheduled Backlog with Edit Buttons
     function renderUnscheduledQueue() {
       const container = document.getElementById('unscheduledListContainer');
       if (!container) return;
@@ -610,7 +598,7 @@
       });
     }
 
-    // Render Calendar Grid with Continuous Horizon Ribbon Stretching
+    // Render Calendar Grid with Continuous Stretching Ribbons
     function renderCalendar() {
       const grid = document.getElementById('calendarGrid');
       const label = document.getElementById('currentPeriodLabel');
@@ -645,7 +633,6 @@
 
           const evWrapper = cell.querySelector('.space-y-1');
 
-          // Collect all events overlapping this day
           const matchingEvents = events.filter(e => {
             const start = e.startDate || e.date;
             const end = e.endDate || e.startDate || e.date;
@@ -662,7 +649,6 @@
 
             const evPill = document.createElement('div');
             
-            // Continuous Ribbon Edge Classes
             let ribbonClass = "span-single";
             if (!isSingleDay) {
               if (isStart) ribbonClass = "span-start";
@@ -674,464 +660,12 @@
             evPill.style.backgroundColor = crew.color + 'f0';
             evPill.onclick = () => openEditJobModal(ev.id);
 
-            // Title rendering: display client and scope primarily on start cell, continuous indicator on spanning cells
             let contentHTML = '';
             if (isStart || isSingleDay) {
               contentHTML = `
                 <div class="truncate mr-1 flex items-center">
                   <span class="font-bold mr-1">${crew.name}:</span>
-                  <span class="truncate">${ev.client || ev.title}</span>
-                  ${ev.scope ? `<span class="opacity-75 ml-1 truncate">(${ev.scope})</span>` : ''}
+                  <span class="truncate">${ev.client \vert{}\vert{} ev.title}</span>${ev.scope ? `<span class="opacity-75 ml-1 truncate">(${ev.scope})</span>` : ''}
                 </div>
                 <button onclick="event.stopPropagation(); openMaps('${ev.address || ''}')" class="text-white/80 hover:text-white shrink-0" title="Map">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
-                </button>
-              `;
-            } else if (isEnd) {
-              contentHTML = `
-                <div class="truncate mr-1 flex items-center">
-                  <span class="font-bold mr-1 opacity-90">${crew.name}</span>
-                  <span class="text-[9px] opacity-75">◀ Finish</span>
-                </div>
-              `;
-            } else {
-              contentHTML = `
-                <div class="w-full flex items-center justify-center text-[9px] opacity-80 tracking-wider font-semibold">
-                  <span>${crew.name} ──▶</span>
-                </div>
-              `;
-            }
-
-            evPill.innerHTML = contentHTML;
-            evWrapper.appendChild(evPill);
-          });
-
-          cell.addEventListener('dragover', (e) => { e.preventDefault(); cell.classList.add('drag-over-cell'); });
-          cell.addEventListener('dragleave', () => cell.classList.remove('drag-over-cell'));
-          cell.addEventListener('drop', (e) => {
-            e.preventDefault();
-            cell.classList.remove('drag-over-cell');
-            const dataStr = e.dataTransfer.getData('text/plain');
-            if (dataStr) handleDropOnDate(JSON.parse(dataStr), dateStr);
-          });
-        } else {
-          cell.classList.add('opacity-30', 'bg-slate-950/40');
-        }
-        grid.appendChild(cell);
-      }
-    }
-
-    function handleDropOnDate(data, dateStr) {
-      if (data.type === 'crew') {
-        const crew = crews.find(c => c.id === data.crewId);
-        events.push({
-          id: 'ev-' + Date.now(),
-          crewId: data.crewId,
-          startDate: dateStr,
-          endDate: dateStr,
-          date: dateStr,
-          title: crew.trade || 'Work Assignment',
-          client: 'Client Project',
-          address: 'Fishers, IN',
-          scope: 'Composite Deck & Railing',
-          status: 'Scheduled'
-        });
-      } else if (data.type === 'sold') {
-        const index = unscheduledJobs.findIndex(j => j.id === data.soldId);
-        if (index !== -1) {
-          const sold = unscheduledJobs[index];
-          let days = 1;
-          if (sold.duration && sold.duration.includes('Day')) {
-            const parsed = parseInt(sold.duration);
-            if (!isNaN(parsed) && parsed > 0) days = parsed;
-          }
-
-          events.push({
-            id: 'ev-' + Date.now(),
-            crewId: crews[0].id,
-            startDate: dateStr,
-            endDate: addDaysToFormatted(dateStr, days - 1),
-            date: dateStr,
-            title: sold.scope,
-            client: sold.client,
-            address: sold.address,
-            scope: sold.scope,
-            status: 'Scheduled'
-          });
-          unscheduledJobs.splice(index, 1);
-        }
-      }
-      pushDataToCloud();
-      renderCalendar();
-      renderUnscheduledQueue();
-    }
-
-    // Touch Support for TV & Mobile
-    let touchDragData = null;
-    const ghost = document.getElementById('touchGhost');
-
-    function handleTouchStart(e) {
-      const card = e.currentTarget;
-      touchDragData = card.dataset.dragType === 'crew' ? { type: 'crew', crewId: card.dataset.crewId } : { type: 'sold', soldId: card.dataset.soldId };
-      document.getElementById('ghostTitle').innerText = touchDragData.type === 'crew' ? "Assign Crew" : "Schedule Job";
-      ghost.style.opacity = '1';
-      const t = e.touches[0];
-      ghost.style.left = t.clientX + 'px';
-      ghost.style.top = t.clientY + 'px';
-    }
-
-    function handleTouchMove(e) {
-      if (!touchDragData) return;
-      e.preventDefault();
-      const t = e.touches[0];
-      ghost.style.left = t.clientX + 'px';
-      ghost.style.top = t.clientY + 'px';
-    }
-
-    function handleTouchEnd(e) {
-      if (!touchDragData) return;
-      ghost.style.opacity = '0';
-      const t = e.changedTouches[0];
-      const target = document.elementFromPoint(t.clientX, t.clientY);
-      const cell = target ? target.closest('[data-date]') : null;
-      if (cell && cell.dataset.date) handleDropOnDate(touchDragData, cell.dataset.date);
-      touchDragData = null;
-    }
-
-    function setSidebarTab(tab) {
-      const btnCrews = document.getElementById('tabBtnCrews');
-      const btnUnscheduled = document.getElementById('tabBtnUnscheduled');
-      const panelCrews = document.getElementById('panelCrews');
-      const panelUnscheduled = document.getElementById('panelUnscheduled');
-
-      if (tab === 'crews') {
-        btnCrews.className = "flex-1 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition shadow";
-        btnUnscheduled.className = "flex-1 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white transition border border-brand-border/60";
-        panelCrews.classList.remove('hidden');
-        panelUnscheduled.classList.add('hidden');
-      } else {
-        btnUnscheduled.className = "flex-1 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition shadow";
-        btnCrews.className = "flex-1 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white transition border border-brand-border/60";
-        panelUnscheduled.classList.remove('hidden');
-        panelCrews.classList.add('hidden');
-      }
-    }
-
-    // Modal Operations
-    function openEditCrewModal(crewId) {
-      const crew = crews.find(c => c.id === crewId);
-      if (!crew) return;
-      document.getElementById('editCrewId').value = crew.id;
-      document.getElementById('editCrewName').value = crew.name;
-      document.getElementById('editCrewTrade').value = crew.trade;
-      document.getElementById('editCrewSize').value = crew.size;
-      document.getElementById('editCrewColor').value = crew.color;
-      document.getElementById('modalEditCrew').classList.remove('hidden');
-    }
-
-    function saveCrewEdit() {
-      const id = document.getElementById('editCrewId').value;
-      const crew = crews.find(c => c.id === id);
-      if (crew) {
-        crew.name = document.getElementById('editCrewName').value;
-        crew.trade = document.getElementById('editCrewTrade').value;
-        crew.size = parseInt(document.getElementById('editCrewSize').value) || 3;
-        crew.color = document.getElementById('editCrewColor').value;
-        pushDataToCloud();
-        renderCrewsSidebar();
-        renderCalendar();
-      }
-      closeModal('modalEditCrew');
-    }
-
-    function setTradePreset(tradeName) {
-      document.getElementById('editCrewTrade').value = tradeName;
-    }
-
-    function setScopePreset(scopeName) {
-      document.getElementById('jobModalScopeInput').value = scopeName;
-    }
-
-    function openNewJobOnDate(dateStr) {
-      document.getElementById('jobModalId').value = '';
-      document.getElementById('jobModalStartDateInput').value = dateStr;
-      document.getElementById('jobModalEndDateInput').value = dateStr;
-      document.getElementById('jobModalTitleInput').value = '';
-      document.getElementById('jobModalAddressInput').value = '';
-      document.getElementById('jobModalScopeInput').value = 'Composite Deck';
-      document.getElementById('durationDaysIndicator').innerText = '1 Day Assignment';
-      document.getElementById('btnDeleteJob').classList.add('hidden');
-      document.getElementById('modalJobTitle').innerText = "Schedule Job Assignment";
-      document.getElementById('modalJobDetails').classList.remove('hidden');
-    }
-
-    function openEditJobModal(evId) {
-      const ev = events.find(e => e.id === evId);
-      if (!ev) return;
-      document.getElementById('jobModalId').value = ev.id;
-      const start = ev.startDate || ev.date;
-      const end = ev.endDate || ev.startDate || ev.date;
-      document.getElementById('jobModalStartDateInput').value = start;
-      document.getElementById('jobModalEndDateInput').value = end;
-      document.getElementById('jobModalCrewSelect').value = ev.crewId;
-      document.getElementById('jobModalTitleInput').value = ev.client || ev.title;
-      document.getElementById('jobModalAddressInput').value = ev.address || '';
-      document.getElementById('jobModalScopeInput').value = ev.scope || 'Composite Deck';
-      document.getElementById('jobModalStatusSelect').value = ev.status || 'Scheduled';
-      document.getElementById('btnDeleteJob').classList.remove('hidden');
-      document.getElementById('modalJobTitle').innerText = "Edit Job Assignment";
-      validateDateRange();
-      document.getElementById('modalJobDetails').classList.remove('hidden');
-    }
-
-    function stretchDuration(numDays) {
-      const start = document.getElementById('jobModalStartDateInput').value;
-      if (!start) return;
-      document.getElementById('jobModalEndDateInput').value = addDaysToFormatted(start, numDays - 1);
-      validateDateRange();
-    }
-
-    function validateDateRange() {
-      const start = document.getElementById('jobModalStartDateInput').value;
-      const end = document.getElementById('jobModalEndDateInput').value;
-      if (end < start) {
-        document.getElementById('jobModalEndDateInput').value = start;
-      }
-      
-      const s = new Date(start);
-      const e = new Date(document.getElementById('jobModalEndDateInput').value);
-      const diffTime = Math.abs(e - s);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      document.getElementById('durationDaysIndicator').innerText = `${diffDays} Day${diffDays > 1 ? 's' : ''} Assignment`;
-    }
-
-    function saveJobAssignment() {
-      const id = document.getElementById('jobModalId').value;
-      const startDate = document.getElementById('jobModalStartDateInput').value;
-      const endDate = document.getElementById('jobModalEndDateInput').value || startDate;
-      const crewId = document.getElementById('jobModalCrewSelect').value;
-      const client = document.getElementById('jobModalTitleInput').value;
-      const address = document.getElementById('jobModalAddressInput').value;
-      const scope = document.getElementById('jobModalScopeInput').value || 'Deck';
-      const status = document.getElementById('jobModalStatusSelect').value;
-
-      if (id) {
-        const ev = events.find(e => e.id === id);
-        if (ev) {
-          Object.assign(ev, { 
-            startDate, 
-            endDate, 
-            date: startDate, 
-            crewId, 
-            client, 
-            address, 
-            scope, 
-            status 
-          });
-        }
-      } else {
-        events.push({
-          id: 'ev-' + Date.now(),
-          crewId,
-          startDate,
-          endDate,
-          date: startDate,
-          title: scope,
-          client,
-          address,
-          scope,
-          status
-        });
-      }
-      pushDataToCloud();
-      renderCalendar();
-      closeModal('modalJobDetails');
-    }
-
-    function deleteCurrentJob() {
-      const id = document.getElementById('jobModalId').value;
-      events = events.filter(e => e.id !== id);
-      pushDataToCloud();
-      renderCalendar();
-      closeModal('modalJobDetails');
-    }
-
-    // Sold / Unscheduled Backlog Handlers (Add, Edit, Delete)
-    function openAddSoldJobModal() {
-      document.getElementById('editSoldJobId').value = '';
-      document.getElementById('soldClientName').value = '';
-      document.getElementById('soldScope').value = '';
-      document.getElementById('soldAddress').value = '';
-      document.getElementById('soldDuration').value = '3 Days';
-      document.getElementById('soldMaterialStatus').value = 'Staged at Yard';
-      document.getElementById('soldModalHeader').innerText = "Add Sold Project to Backlog";
-      document.getElementById('btnDeleteSoldJob').classList.add('hidden');
-      document.getElementById('modalAddSoldJob').classList.remove('hidden');
-    }
-
-    function openEditSoldJobModal(jobId) {
-      const job = unscheduledJobs.find(j => j.id === jobId);
-      if (!job) return;
-      document.getElementById('editSoldJobId').value = job.id;
-      document.getElementById('soldClientName').value = job.client;
-      document.getElementById('soldScope').value = job.scope;
-      document.getElementById('soldAddress').value = job.address;
-      document.getElementById('soldDuration').value = job.duration || '3 Days';
-      document.getElementById('soldMaterialStatus').value = job.materialStatus || 'Staged at Yard';
-      document.getElementById('soldModalHeader').innerText = "Edit Unscheduled Project";
-      document.getElementById('btnDeleteSoldJob').classList.remove('hidden');
-      document.getElementById('modalAddSoldJob').classList.remove('hidden');
-    }
-
-    function saveSoldJobToBacklog() {
-      const id = document.getElementById('editSoldJobId').value;
-      const client = document.getElementById('soldClientName').value;
-      const scope = document.getElementById('soldScope').value;
-      const address = document.getElementById('soldAddress').value;
-      const duration = document.getElementById('soldDuration').value;
-      const materialStatus = document.getElementById('soldMaterialStatus').value;
-
-      if (!client) return;
-
-      if (id) {
-        const job = unscheduledJobs.find(j => j.id === id);
-        if (job) {
-          Object.assign(job, { client, scope, address, duration, materialStatus });
-        }
-      } else {
-        unscheduledJobs.push({
-          id: 'sold-' + Date.now(),
-          client,
-          scope,
-          address,
-          duration,
-          materialStatus
-        });
-      }
-      pushDataToCloud();
-      renderUnscheduledQueue();
-      closeModal('modalAddSoldJob');
-    }
-
-    function deleteCurrentSoldJob() {
-      const id = document.getElementById('editSoldJobId').value;
-      if (id) {
-        unscheduledJobs = unscheduledJobs.filter(j => j.id !== id);
-        pushDataToCloud();
-        renderUnscheduledQueue();
-      }
-      closeModal('modalAddSoldJob');
-    }
-
-    function openMaps(address) {
-      if (address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
-    }
-
-    function openCurrentModalAddressInGoogleMaps() {
-      const addr = document.getElementById('jobModalAddressInput').value;
-      if (addr) openMaps(addr);
-    }
-
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-    function navigatePeriod(step) { currentDate.setMonth(currentDate.getMonth() + step); renderCalendar(); }
-    function goToToday() { currentDate = new Date(); renderCalendar(); }
-    function setView(view) {
-      currentView = view;
-      document.getElementById('btnViewMonth').className = view === 'month' ? "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950" : "px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800";
-      document.getElementById('btnViewWeek').className = view === 'week' ? "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950" : "px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800";
-      renderCalendar();
-    }
-
-    function toggleWallFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-      }
-    }
-
-    // Dynamic Weather Canvas Across Full Header Bar
-    const sky = document.getElementById('weatherSkyCanvas');
-    const sCtx = sky.getContext('2d');
-    let clouds = [
-      { x: 30, y: 15, r: 16, s: 0.15 },
-      { x: 180, y: 20, r: 20, s: 0.12 },
-      { x: 360, y: 12, r: 14, s: 0.18 },
-      { x: 580, y: 18, r: 22, s: 0.14 },
-      { x: 800, y: 14, r: 18, s: 0.16 }
-    ];
-
-    function animSky() {
-      sky.width = sky.offsetWidth;
-      sky.height = sky.offsetHeight;
-      sCtx.clearRect(0, 0, sky.width, sky.height);
-
-      sCtx.fillStyle = "rgba(255, 255, 255, 0.08)";
-      clouds.forEach(c => {
-        c.x += c.s;
-        if (c.x > sky.width + 40) c.x = -40;
-        sCtx.beginPath();
-        sCtx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-        sCtx.arc(c.x + 10, c.y - 4, c.r * 0.75, 0, Math.PI * 2);
-        sCtx.fill();
-      });
-
-      requestAnimationFrame(animSky);
-    }
-    requestAnimationFrame(animSky);
-
-    // Live Doppler Radar Modal
-    function openRadarModal() {
-      document.getElementById('modalRadar').classList.remove('hidden');
-      initDoppler();
-    }
-
-    let rAng = 0;
-    function initDoppler() {
-      const rCan = document.getElementById('dopplerRadarCanvas');
-      const rCtx = rCan.getContext('2d');
-      rCan.width = rCan.offsetWidth;
-      rCan.height = rCan.offsetHeight;
-
-      function sweep() {
-        if (document.getElementById('modalRadar').classList.contains('hidden')) return;
-        rCtx.fillStyle = '#0a0f1d';
-        rCtx.fillRect(0, 0, rCan.width, rCan.height);
-        const cx = rCan.width / 2, cy = rCan.height / 2, maxR = Math.min(cx, cy) - 20;
-
-        rCtx.strokeStyle = '#1e293b';
-        for (let r = 50; r <= maxR; r += 50) {
-          rCtx.beginPath(); rCtx.arc(cx, cy, r, 0, Math.PI * 2); rCtx.stroke();
-        }
-        rCtx.beginPath(); rCtx.moveTo(cx - maxR, cy); rCtx.lineTo(cx + maxR, cy);
-        rCtx.moveTo(cx, cy - maxR); rCtx.lineTo(cx, cy + maxR); rCtx.stroke();
-
-        rAng += 0.035;
-        rCtx.save();
-        rCtx.translate(cx, cy);
-        rCtx.rotate(rAng);
-        const grad = rCtx.createLinearGradient(0, 0, maxR, 0);
-        grad.addColorStop(0, 'rgba(245,158,11,0)');
-        grad.addColorStop(1, 'rgba(245,158,11,0.65)');
-        rCtx.fillStyle = grad;
-        rCtx.beginPath();
-        rCtx.moveTo(0, 0);
-        rCtx.arc(0, 0, maxR, 0, 0.3);
-        rCtx.fill();
-        rCtx.restore();
-
-        rCtx.fillStyle = '#f59e0b';
-        rCtx.beginPath(); rCtx.arc(cx, cy, 3, 0, Math.PI * 2); rCtx.fill();
-        requestAnimationFrame(sweep);
-      }
-      requestAnimationFrame(sweep);
-    }
-
-    // Initialize UI
-    renderCrewsSidebar();
-    renderUnscheduledQueue();
-    renderCalendar();
-    renderForecastStrip();
-  </script>
-</body>
-</html>
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2
