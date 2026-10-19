@@ -46,11 +46,36 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .drag-over-cell { background-color: rgba(245, 158, 11, 0.15) !important; outline: 2px dashed #f59e0b !important; }
-    
-    /* Multi-day connected pill styling */
-    .span-start { border-top-right-radius: 0px !important; border-bottom-right-radius: 0px !important; margin-right: -4px !important; }
-    .span-middle { border-radius: 0px !important; margin-left: -4px !important; margin-right: -4px !important; }
-    .span-end { border-top-left-radius: 0px !important; border-bottom-left-radius: 0px !important; margin-left: -4px !important; }
+
+    /* Seamless Multi-Day Banner Stretching Across Grid Boundaries */
+    .span-start {
+      border-top-right-radius: 0px !important;
+      border-bottom-right-radius: 0px !important;
+      margin-right: -0.45rem !important;
+      border-right: none !important;
+      position: relative;
+      z-index: 20;
+    }
+    .span-middle {
+      border-radius: 0px !important;
+      margin-left: -0.45rem !important;
+      margin-right: -0.45rem !important;
+      border-left: none !important;
+      border-right: none !important;
+      position: relative;
+      z-index: 10;
+    }
+    .span-end {
+      border-top-left-radius: 0px !important;
+      border-bottom-left-radius: 0px !important;
+      margin-left: -0.45rem !important;
+      border-left: none !important;
+      position: relative;
+      z-index: 20;
+    }
+    .span-single {
+      border-radius: 0.5rem !important;
+    }
   </style>
 </head>
 <body class="bg-[#0a0f1d] text-slate-100 min-h-screen flex flex-col select-none antialiased overflow-x-hidden">
@@ -122,13 +147,13 @@
     <div id="forecastDaysContainer" class="relative z-10 flex items-center gap-2 overflow-x-auto custom-scrollbar text-xs"></div>
   </div>
 
-  <!-- Main Dashboard Workspace -->
+  <!-- Main Workspace -->
   <div class="flex-1 flex overflow-hidden">
 
     <!-- Left Sidebar: Active Crews & Jobs Sold/Unscheduled Backlog -->
     <aside class="w-80 bg-slate-900 border-r border-brand-border flex flex-col shrink-0">
       
-      <!-- Original Restored Tabs -->
+      <!-- Restored Pill Tabs -->
       <div class="p-2.5 border-b border-brand-border bg-slate-950/60 flex gap-2">
         <button onclick="setSidebarTab('crews')" id="tabBtnCrews" class="flex-1 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 transition shadow">Active Crews</button>
         <button onclick="setSidebarTab('unscheduled')" id="tabBtnUnscheduled" class="flex-1 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-slate-400 hover:text-white transition border border-brand-border/60">Jobs Sold/Unscheduled</button>
@@ -143,7 +168,7 @@
         <div id="crewsListContainer" class="space-y-2"></div>
       </div>
 
-      <!-- Panel 2: Jobs Sold/Unscheduled -->
+      <!-- Panel 2: Jobs Sold/Unscheduled with Full Edit Capabilities -->
       <div id="panelUnscheduled" class="hidden flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
         <div class="flex items-center justify-between px-1 mb-1">
           <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Unscheduled Backlog</span>
@@ -212,7 +237,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: Job Assignment Modal with Multi-Day Date Stretch Controls -->
+  <!-- MODAL 2: Job Assignment Modal with Free-Form Editable Project Scope & Multi-Day Span -->
   <div id="modalJobDetails" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-brand-border rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-brand-border pb-3">
@@ -228,37 +253,51 @@
           <select id="jobModalCrewSelect" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400"></select>
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Project Scope</label>
-          <select id="jobModalScopeSelect" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
-            <option value="Deck">Composite Deck</option>
-            <option value="Pergola">Louvered Pergola</option>
-            <option value="Pavilion">Timber Pavilion</option>
-            <option value="Porch">Screened Porch</option>
-            <option value="Pickup / Delivery">Material Delivery</option>
+          <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Status</label>
+          <select id="jobModalStatusSelect" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+            <option value="Scheduled">Scheduled</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Material Staged">Material Staged</option>
+            <option value="Inspection Pending">Inspection Pending</option>
           </select>
         </div>
       </div>
 
-      <!-- Multi-Day Date Span Controls -->
+      <!-- Multi-Day Date Stretch Engine -->
       <div class="bg-slate-950/80 p-3 rounded-xl border border-brand-border space-y-2">
-        <label class="block text-xs font-bold uppercase text-amber-400">Jobsite Duration & Multi-Day Span</label>
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold uppercase text-amber-400">Jobsite Duration & Continuous Stretch</label>
+          <span class="text-[10px] text-slate-400" id="durationDaysIndicator">1 Day Assignment</span>
+        </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] text-slate-400 uppercase">Start Date</label>
             <input type="date" id="jobModalStartDateInput" onchange="validateDateRange()" class="w-full bg-slate-900 border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
           </div>
           <div>
-            <label class="block text-[10px] text-slate-400 uppercase">End Date (Stretch Job)</label>
+            <label class="block text-[10px] text-slate-400 uppercase">End Date (Stretches Thru)</label>
             <input type="date" id="jobModalEndDateInput" onchange="validateDateRange()" class="w-full bg-slate-900 border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
           </div>
         </div>
-        <!-- Quick duration stretch presets -->
         <div class="flex items-center gap-1.5 pt-1">
           <span class="text-[10px] text-slate-500 font-bold uppercase">Quick Stretch:</span>
           <button type="button" onclick="stretchDuration(1)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">1 Day</button>
           <button type="button" onclick="stretchDuration(2)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">2 Days</button>
           <button type="button" onclick="stretchDuration(3)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">3 Days</button>
           <button type="button" onclick="stretchDuration(5)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">5 Days (Work Week)</button>
+        </div>
+      </div>
+
+      <!-- Fully Editable Scope Text Input with Presets -->
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Project Scope (Custom Input)</label>
+        <input type="text" id="jobModalScopeInput" placeholder="e.g. 24x16 Trex Deck, Railing & Louvered Pergola" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          <button type="button" onclick="setScopePreset('Composite Deck')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">Composite Deck</button>
+          <button type="button" onclick="setScopePreset('Louvered Pergola')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">Louvered Pergola</button>
+          <button type="button" onclick="setScopePreset('Timber Pavilion')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">Timber Pavilion</button>
+          <button type="button" onclick="setScopePreset('Screened Porch')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">Screened Porch</button>
+          <button type="button" onclick="setScopePreset('Pickup / Material Delivery')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-brand-border">Pickup/Delivery</button>
         </div>
       </div>
 
@@ -277,16 +316,6 @@
         </div>
       </div>
 
-      <div>
-        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Status</label>
-        <select id="jobModalStatusSelect" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
-          <option value="Scheduled">Scheduled</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Material Staged">Material Staged</option>
-          <option value="Inspection Pending">Inspection Pending</option>
-        </select>
-      </div>
-
       <div class="flex justify-between items-center pt-3 border-t border-brand-border">
         <button type="button" id="btnDeleteJob" onclick="deleteCurrentJob()" class="px-3 py-2 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition">Delete Job</button>
         <div class="flex gap-2">
@@ -297,13 +326,15 @@
     </div>
   </div>
 
-  <!-- MODAL 3: Add Sold Job to Backlog -->
+  <!-- MODAL 3: Add / Edit Jobs Sold & Unscheduled Backlog Item -->
   <div id="modalAddSoldJob" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-brand-border rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="text-base font-bold text-white">Add Sold Project to Backlog</h3>
+        <h3 id="soldModalHeader" class="text-base font-bold text-white">Add Sold Project to Backlog</h3>
         <button onclick="closeModal('modalAddSoldJob')" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
+
+      <input type="hidden" id="editSoldJobId">
 
       <div>
         <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Client Name</label>
@@ -311,7 +342,7 @@
       </div>
 
       <div>
-        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Scope</label>
+        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Project Scope (Custom Input)</label>
         <input type="text" id="soldScope" placeholder="e.g. 24x16 Trex Deck & Railing" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
       </div>
 
@@ -320,9 +351,28 @@
         <input type="text" id="soldAddress" placeholder="e.g. Geist Reservoir, Fishers, IN" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
       </div>
 
-      <div class="flex justify-end gap-2 pt-3 border-t border-brand-border">
-        <button type="button" onclick="closeModal('modalAddSoldJob')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
-        <button type="button" onclick="saveSoldJobToBacklog()" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg">Add to Pipeline</button>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Estimated Duration</label>
+          <input type="text" id="soldDuration" placeholder="e.g. 3 Days" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Material Status</label>
+          <select id="soldMaterialStatus" class="w-full bg-slate-950 border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
+            <option value="PO Ordered">PO Ordered</option>
+            <option value="Staged at Yard">Staged at Yard</option>
+            <option value="Permit Pending">Permit Pending</option>
+            <option value="Ready to Build">Ready to Build</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center pt-3 border-t border-brand-border">
+        <button type="button" id="btnDeleteSoldJob" onclick="deleteCurrentSoldJob()" class="px-3 py-2 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition hidden">Delete</button>
+        <div class="flex gap-2 ml-auto">
+          <button type="button" onclick="closeModal('modalAddSoldJob')" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
+          <button type="button" onclick="saveSoldJobToBacklog()" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg">Save Project</button>
+        </div>
       </div>
     </div>
   </div>
@@ -349,7 +399,7 @@
     </div>
   </div>
 
-  <!-- APPLICATION LOGIC & REALTIME ENGINE -->
+  <!-- APPLICATION LOGIC & FIREBASE CLOUD ENGINE -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCJM-9LdpG9LWY1gWp8XIW_ox5jOw6GcDM",
@@ -425,7 +475,6 @@
       { id: 'sold-2', client: 'Miller', scope: 'Louvered Pergola & Trex Deck', address: 'Brooks School Rd, Fishers, IN', duration: '3 Days', materialStatus: 'Ready to Build' }
     ];
 
-    // Multi-day initial events (with startDate and endDate)
     let events = JSON.parse(localStorage.getItem('crew_schedule_events_v3')) || [
       { 
         id: 'ev-1', 
@@ -436,7 +485,7 @@
         title: 'Framing & Footers', 
         client: 'Robertson', 
         address: '116th & Olio Rd, Fishers, IN', 
-        scope: 'Deck', 
+        scope: 'Composite Deck & Louvered Pergola', 
         status: 'In Progress' 
       }
     ];
@@ -451,7 +500,6 @@
       return formatDate(target);
     }
 
-    // 5-Day Weather Forecast Data for Fishers, IN
     const forecastDays = [
       { day: 'Mon', high: 68, low: 39, cond: 'Sunny', rain: '0%', icon: '☀️' },
       { day: 'Tue', high: 71, low: 39, cond: 'Sunny', rain: '5%', icon: '☀️' },
@@ -521,6 +569,7 @@
       });
     }
 
+    // Render Jobs Sold/Unscheduled Backlog with Complete Edit Features
     function renderUnscheduledQueue() {
       const container = document.getElementById('unscheduledListContainer');
       if (!container) return;
@@ -528,7 +577,7 @@
 
       unscheduledJobs.forEach(job => {
         const item = document.createElement('div');
-        item.className = "bg-slate-950/80 border border-brand-border hover:border-amber-400/50 rounded-xl p-2.5 cursor-grab active:cursor-grabbing transition shadow-sm space-y-1";
+        item.className = "bg-slate-950/80 border border-brand-border hover:border-amber-400/50 rounded-xl p-2.5 cursor-grab active:cursor-grabbing transition shadow-sm space-y-1.5 relative group";
         item.setAttribute('draggable', 'true');
         item.dataset.soldId = job.id;
         item.dataset.dragType = 'sold';
@@ -540,13 +589,19 @@
 
         item.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-white">${job.client}</span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">${job.materialStatus || 'Sold'}</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-white">${job.client}</span>
+              <span class="text-[9px] text-slate-400 font-mono">(${job.duration || '3 Days'})</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">${job.materialStatus || 'Sold'}</span>
+              <button onclick="event.stopPropagation(); openEditSoldJobModal('${job.id}')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[9px] font-bold border border-brand-border">Edit</button>
+            </div>
           </div>
-          <p class="text-[11px] text-slate-300">${job.scope}</p>
+          <p class="text-[11px] text-slate-300 leading-tight">${job.scope}</p>
           <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
             <span class="truncate max-w-[170px]">${job.address}</span>
-            <button onclick="openMaps('${job.address}')" class="text-amber-400 hover:text-amber-300" title="Open in Google Maps">
+            <button onclick="event.stopPropagation(); openMaps('${job.address}')" class="text-amber-400 hover:text-amber-300" title="Open in Google Maps">
               <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
             </button>
           </div>
@@ -555,7 +610,7 @@
       });
     }
 
-    // Render Calendar with Multi-Day Connected Spans
+    // Render Calendar Grid with Continuous Horizon Ribbon Stretching
     function renderCalendar() {
       const grid = document.getElementById('calendarGrid');
       const label = document.getElementById('currentPeriodLabel');
@@ -573,7 +628,7 @@
       for (let i = 0; i < totalCells; i++) {
         const dayNumber = i - firstDay + 1;
         const cell = document.createElement('div');
-        cell.className = "bg-slate-900/90 border border-brand-border/40 p-1.5 min-h-[90px] flex flex-col justify-between transition-colors overflow-hidden";
+        cell.className = "bg-slate-900/90 border border-brand-border/40 p-1.5 min-h-[90px] flex flex-col justify-between transition-colors overflow-hidden relative";
 
         if (dayNumber > 0 && dayNumber <= daysInMonth) {
           const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
@@ -581,7 +636,7 @@
           const isToday = dateStr === formatDate(new Date());
 
           cell.innerHTML = `
-            <div class="flex items-center justify-between pb-1 border-b border-slate-800/60">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-800/60 shrink-0">
               <span class="text-xs font-bold ${isToday ? 'w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-black' : 'text-slate-400'}">${dayNumber}</span>
               <button onclick="openNewJobOnDate('${dateStr}')" class="text-[10px] text-slate-400 hover:text-white px-1 font-bold">+</button>
             </div>
@@ -590,7 +645,7 @@
 
           const evWrapper = cell.querySelector('.space-y-1');
 
-          // Find single-day or multi-day spanning events covering this day
+          // Collect all events overlapping this day
           const matchingEvents = events.filter(e => {
             const start = e.startDate || e.date;
             const end = e.endDate || e.startDate || e.date;
@@ -607,38 +662,47 @@
 
             const evPill = document.createElement('div');
             
-            // Apply connected spanning classes
-            let spanClass = "rounded-lg";
+            // Continuous Ribbon Edge Classes
+            let ribbonClass = "span-single";
             if (!isSingleDay) {
-              if (isStart) spanClass = "span-start";
-              else if (isEnd) spanClass = "span-end";
-              else spanClass = "span-middle";
+              if (isStart) ribbonClass = "span-start";
+              else if (isEnd) ribbonClass = "span-end";
+              else ribbonClass = "span-middle";
             }
 
-            evPill.className = `p-1 text-[10px] text-white flex items-center justify-between shadow-sm cursor-pointer border border-white/10 hover:brightness-110 transition ${spanClass}`;
-            evPill.style.backgroundColor = crew.color + 'ee';
+            evPill.className = `p-1 text-[10px] text-white flex items-center justify-between shadow-sm cursor-pointer border-t border-b border-white/20 hover:brightness-110 transition h-6 ${ribbonClass}`;
+            evPill.style.backgroundColor = crew.color + 'f0';
             evPill.onclick = () => openEditJobModal(ev.id);
 
-            // Left icon indicator for multi-day continuation
-            let stretchTag = '';
-            if (!isSingleDay) {
-              if (isStart) stretchTag = `<span class="opacity-80 font-mono text-[9px] mr-1">▶</span>`;
-              else if (isEnd) stretchTag = `<span class="opacity-80 font-mono text-[9px] mr-1">◀</span>`;
-              else stretchTag = `<span class="opacity-75 font-mono text-[8px] mr-1">↔</span>`;
-            }
-
-            evPill.innerHTML = `
-              <div class="truncate mr-1 flex items-center">
-                ${stretchTag}
-                <span class="font-bold mr-1">${crew.name}:</span>
-                <span class="truncate">${ev.client || ev.title}</span>
-              </div>
-              ${isStart || isSingleDay ? `
+            // Title rendering: display client and scope primarily on start cell, continuous indicator on spanning cells
+            let contentHTML = '';
+            if (isStart || isSingleDay) {
+              contentHTML = `
+                <div class="truncate mr-1 flex items-center">
+                  <span class="font-bold mr-1">${crew.name}:</span>
+                  <span class="truncate">${ev.client || ev.title}</span>
+                  ${ev.scope ? `<span class="opacity-75 ml-1 truncate">(${ev.scope})</span>` : ''}
+                </div>
                 <button onclick="event.stopPropagation(); openMaps('${ev.address || ''}')" class="text-white/80 hover:text-white shrink-0" title="Map">
                   <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
                 </button>
-              ` : ''}
-            `;
+              `;
+            } else if (isEnd) {
+              contentHTML = `
+                <div class="truncate mr-1 flex items-center">
+                  <span class="font-bold mr-1 opacity-90">${crew.name}</span>
+                  <span class="text-[9px] opacity-75">◀ Finish</span>
+                </div>
+              `;
+            } else {
+              contentHTML = `
+                <div class="w-full flex items-center justify-center text-[9px] opacity-80 tracking-wider font-semibold">
+                  <span>${crew.name} ──▶</span>
+                </div>
+              `;
+            }
+
+            evPill.innerHTML = contentHTML;
             evWrapper.appendChild(evPill);
           });
 
@@ -669,14 +733,13 @@
           title: crew.trade || 'Work Assignment',
           client: 'Client Project',
           address: 'Fishers, IN',
-          scope: 'Deck',
+          scope: 'Composite Deck & Railing',
           status: 'Scheduled'
         });
       } else if (data.type === 'sold') {
         const index = unscheduledJobs.findIndex(j => j.id === data.soldId);
         if (index !== -1) {
           const sold = unscheduledJobs[index];
-          // Default duration parsing (e.g. "3 Days" -> stretches 3 days)
           let days = 1;
           if (sold.duration && sold.duration.includes('Day')) {
             const parsed = parseInt(sold.duration);
@@ -692,7 +755,7 @@
             title: sold.scope,
             client: sold.client,
             address: sold.address,
-            scope: 'Deck',
+            scope: sold.scope,
             status: 'Scheduled'
           });
           unscheduledJobs.splice(index, 1);
@@ -735,7 +798,6 @@
       touchDragData = null;
     }
 
-    // Tab Switcher
     function setSidebarTab(tab) {
       const btnCrews = document.getElementById('tabBtnCrews');
       const btnUnscheduled = document.getElementById('tabBtnUnscheduled');
@@ -755,7 +817,7 @@
       }
     }
 
-    // Modal Operations & Multi-Day Stretching
+    // Modal Operations
     function openEditCrewModal(crewId) {
       const crew = crews.find(c => c.id === crewId);
       if (!crew) return;
@@ -786,12 +848,18 @@
       document.getElementById('editCrewTrade').value = tradeName;
     }
 
+    function setScopePreset(scopeName) {
+      document.getElementById('jobModalScopeInput').value = scopeName;
+    }
+
     function openNewJobOnDate(dateStr) {
       document.getElementById('jobModalId').value = '';
       document.getElementById('jobModalStartDateInput').value = dateStr;
       document.getElementById('jobModalEndDateInput').value = dateStr;
       document.getElementById('jobModalTitleInput').value = '';
       document.getElementById('jobModalAddressInput').value = '';
+      document.getElementById('jobModalScopeInput').value = 'Composite Deck';
+      document.getElementById('durationDaysIndicator').innerText = '1 Day Assignment';
       document.getElementById('btnDeleteJob').classList.add('hidden');
       document.getElementById('modalJobTitle').innerText = "Schedule Job Assignment";
       document.getElementById('modalJobDetails').classList.remove('hidden');
@@ -801,15 +869,18 @@
       const ev = events.find(e => e.id === evId);
       if (!ev) return;
       document.getElementById('jobModalId').value = ev.id;
-      document.getElementById('jobModalStartDateInput').value = ev.startDate || ev.date;
-      document.getElementById('jobModalEndDateInput').value = ev.endDate || ev.startDate || ev.date;
+      const start = ev.startDate || ev.date;
+      const end = ev.endDate || ev.startDate || ev.date;
+      document.getElementById('jobModalStartDateInput').value = start;
+      document.getElementById('jobModalEndDateInput').value = end;
       document.getElementById('jobModalCrewSelect').value = ev.crewId;
       document.getElementById('jobModalTitleInput').value = ev.client || ev.title;
       document.getElementById('jobModalAddressInput').value = ev.address || '';
-      document.getElementById('jobModalScopeSelect').value = ev.scope || 'Deck';
+      document.getElementById('jobModalScopeInput').value = ev.scope || 'Composite Deck';
       document.getElementById('jobModalStatusSelect').value = ev.status || 'Scheduled';
       document.getElementById('btnDeleteJob').classList.remove('hidden');
       document.getElementById('modalJobTitle').innerText = "Edit Job Assignment";
+      validateDateRange();
       document.getElementById('modalJobDetails').classList.remove('hidden');
     }
 
@@ -817,6 +888,7 @@
       const start = document.getElementById('jobModalStartDateInput').value;
       if (!start) return;
       document.getElementById('jobModalEndDateInput').value = addDaysToFormatted(start, numDays - 1);
+      validateDateRange();
     }
 
     function validateDateRange() {
@@ -825,6 +897,12 @@
       if (end < start) {
         document.getElementById('jobModalEndDateInput').value = start;
       }
+      
+      const s = new Date(start);
+      const e = new Date(document.getElementById('jobModalEndDateInput').value);
+      const diffTime = Math.abs(e - s);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById('durationDaysIndicator').innerText = `${diffDays} Day${diffDays > 1 ? 's' : ''} Assignment`;
     }
 
     function saveJobAssignment() {
@@ -834,7 +912,7 @@
       const crewId = document.getElementById('jobModalCrewSelect').value;
       const client = document.getElementById('jobModalTitleInput').value;
       const address = document.getElementById('jobModalAddressInput').value;
-      const scope = document.getElementById('jobModalScopeSelect').value;
+      const scope = document.getElementById('jobModalScopeInput').value || 'Deck';
       const status = document.getElementById('jobModalStatusSelect').value;
 
       if (id) {
@@ -878,22 +956,70 @@
       closeModal('modalJobDetails');
     }
 
+    // Sold / Unscheduled Backlog Handlers (Add, Edit, Delete)
     function openAddSoldJobModal() {
+      document.getElementById('editSoldJobId').value = '';
       document.getElementById('soldClientName').value = '';
       document.getElementById('soldScope').value = '';
       document.getElementById('soldAddress').value = '';
+      document.getElementById('soldDuration').value = '3 Days';
+      document.getElementById('soldMaterialStatus').value = 'Staged at Yard';
+      document.getElementById('soldModalHeader').innerText = "Add Sold Project to Backlog";
+      document.getElementById('btnDeleteSoldJob').classList.add('hidden');
+      document.getElementById('modalAddSoldJob').classList.remove('hidden');
+    }
+
+    function openEditSoldJobModal(jobId) {
+      const job = unscheduledJobs.find(j => j.id === jobId);
+      if (!job) return;
+      document.getElementById('editSoldJobId').value = job.id;
+      document.getElementById('soldClientName').value = job.client;
+      document.getElementById('soldScope').value = job.scope;
+      document.getElementById('soldAddress').value = job.address;
+      document.getElementById('soldDuration').value = job.duration || '3 Days';
+      document.getElementById('soldMaterialStatus').value = job.materialStatus || 'Staged at Yard';
+      document.getElementById('soldModalHeader').innerText = "Edit Unscheduled Project";
+      document.getElementById('btnDeleteSoldJob').classList.remove('hidden');
       document.getElementById('modalAddSoldJob').classList.remove('hidden');
     }
 
     function saveSoldJobToBacklog() {
+      const id = document.getElementById('editSoldJobId').value;
       const client = document.getElementById('soldClientName').value;
       const scope = document.getElementById('soldScope').value;
       const address = document.getElementById('soldAddress').value;
+      const duration = document.getElementById('soldDuration').value;
+      const materialStatus = document.getElementById('soldMaterialStatus').value;
+
       if (!client) return;
 
-      unscheduledJobs.push({ id: 'sold-' + Date.now(), client, scope, address, duration: '3 Days', materialStatus: 'Staged at Yard' });
+      if (id) {
+        const job = unscheduledJobs.find(j => j.id === id);
+        if (job) {
+          Object.assign(job, { client, scope, address, duration, materialStatus });
+        }
+      } else {
+        unscheduledJobs.push({
+          id: 'sold-' + Date.now(),
+          client,
+          scope,
+          address,
+          duration,
+          materialStatus
+        });
+      }
       pushDataToCloud();
       renderUnscheduledQueue();
+      closeModal('modalAddSoldJob');
+    }
+
+    function deleteCurrentSoldJob() {
+      const id = document.getElementById('editSoldJobId').value;
+      if (id) {
+        unscheduledJobs = unscheduledJobs.filter(j => j.id !== id);
+        pushDataToCloud();
+        renderUnscheduledQueue();
+      }
       closeModal('modalAddSoldJob');
     }
 
@@ -974,7 +1100,7 @@
         const cx = rCan.width / 2, cy = rCan.height / 2, maxR = Math.min(cx, cy) - 20;
 
         rCtx.strokeStyle = '#1e293b';
-        for (let r = 40; r <= maxR; r += 40) {
+        for (let r = 50; r <= maxR; r += 50) {
           rCtx.beginPath(); rCtx.arc(cx, cy, r, 0, Math.PI * 2); rCtx.stroke();
         }
         rCtx.beginPath(); rCtx.moveTo(cx - maxR, cy); rCtx.lineTo(cx + maxR, cy);
